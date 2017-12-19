@@ -330,8 +330,7 @@ int runCommand(struct job newJob, struct jobSet * jobList, int inBg) {
 			printf(JOB_STATUS_FORMAT, job->jobId, statusString, job->text);
 		}
         return 0;
-    } else if (!strcmp(newJob.progs[0].argv[0], "fg") ||
-               !strcmp(newJob.progs[0].argv[0], "bg")) {
+    } else if (!strcmp(newJob.progs[0].argv[0], "fg") || !strcmp(newJob.progs[0].argv[0], "bg")) {
 		//STUDENT PART 2: bg/fg syntax checks
 		if( newJob.progs[0].argv[1][0] != '%') {
 			printf("Invalid synax. Argument should be %%, followed by process number");
@@ -372,13 +371,12 @@ int runCommand(struct job newJob, struct jobSet * jobList, int inBg) {
 
 		//STUDENT PART 4: Move to foreground
 		/*Only for fg command*/
-		if( newJob.progs[0].argv[0][0] == 'f' ) {
+		if( newJob.progs[0].argv[0][0] == 'f' ) 
 			if (tcsetpgrp(0, job->pgrp))
                     perror("tcsetpgrp");
 		
-
+		/*If this point has been reached succesfully, exit*/
         return 0;
-		}
     }
 
     nextin = 0, nextout = 1;
