@@ -324,9 +324,9 @@ int runCommand(struct job newJob, struct jobSet * jobList, int inBg) {
 		for(job = jobList->head; job != NULL; job = job->next) {
 			for( i = 0; i < job->runningProgs; i++) {
 				if( job->progs[i].isStopped ) {
-					sprintf(statusString, "Running");
-				} else {
 					sprintf(statusString, "Stopped");
+				} else {
+					sprintf(statusString, "Running");
 				}
 			}
 			printf(JOB_STATUS_FORMAT, job->jobId, statusString, job->text);
