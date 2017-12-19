@@ -16,6 +16,7 @@
                                    string */
 #define JOB_STATUS_FORMAT "[%d] %-22s %.40s\n"
 
+#define STATUS_STRING_SIZE 10 /*max length of status string for jobs command */
 
 
 struct jobSet {
@@ -319,6 +320,7 @@ int runCommand(struct job newJob, struct jobSet * jobList, int inBg) {
         return 0;
     } else if (!strcmp(newJob.progs[0].argv[0], "jobs")) {
 		//STUDENT PART 1: Impelementing jobs command
+		statusString = malloc(STATUS_STRING_SIZE);
 		for(job = jobList->head; job != NULL; job = job->next) {
 			for( i = 0; i < job->runningProgs; i++) {
 				if( job->progs[i].isStopped ) {
