@@ -336,15 +336,15 @@ int runCommand(struct job newJob, struct jobSet * jobList, int inBg) {
     } else if (!strcmp(newJob.progs[0].argv[0], "fg") || !strcmp(newJob.progs[0].argv[0], "bg")) {
 		//STUDENT PART 2: bg/fg syntax checks
 		if( newJob.progs[0].argv[1][0] != '%') {
-			printf("Invalid synax. Argument should be %%, followed by process number");
+			printf("Invalid synax. Argument should be \%, followed by process number\n");
 			return 1;
 		}
 		jobNum = atoi(&(newJob.progs[0].argv[1][1]));
 		if( jobNum == 0 &&  newJob.progs[0].argv[1][1] != '0') {
-			printf("Invalid synax. Argument should be %%, followed by process number");
+			printf("Invalid synax. Argument should be \%, followed by process number\n");
 			return 1;
 		}
-		for(job = jobList->head; job->jobId != jobNum && job != NULL; job = job->next);
+		for(job = jobList->head; job != NULL && job->jobId != jobNum; job = job->next);
 		if( job == NULL ) {
 			printf("Invalid job IDs. Please type \"jobs\" for a list of job IDs");
 			return 1;
