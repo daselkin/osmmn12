@@ -331,6 +331,7 @@ int runCommand(struct job newJob, struct jobSet * jobList, int inBg) {
 			}
 			printf(JOB_STATUS_FORMAT, job->jobId, statusString, job->text);
 		}
+		free(statusString);
         return 0;
     } else if (!strcmp(newJob.progs[0].argv[0], "fg") || !strcmp(newJob.progs[0].argv[0], "bg")) {
 		//STUDENT PART 2: bg/fg syntax checks
@@ -338,8 +339,7 @@ int runCommand(struct job newJob, struct jobSet * jobList, int inBg) {
 			printf("Invalid synax. Argument should be %%, followed by process number");
 			return 1;
 		}
-		strcpy(buf, &(newJob.progs[0].argv[1][1]));
-		jobNum = atoi(buf);
+		jobNum = atoi(&(newJob.progs[0].argv[1][1]));
 		if( jobNum == 0 &&  newJob.progs[0].argv[1][1] != '0') {
 			printf("Invalid synax. Argument should be %%, followed by process number");
 			return 1;
