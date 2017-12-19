@@ -331,7 +331,7 @@ int runCommand(struct job newJob, struct jobSet * jobList, int inBg) {
 			}
 			printf(JOB_STATUS_FORMAT, job->jobId, statusString, job->text);
 		}
-		free(statusString);
+		//free(statusString);
         return 0;
     } else if (!strcmp(newJob.progs[0].argv[0], "fg") || !strcmp(newJob.progs[0].argv[0], "bg")) {
 		//STUDENT PART 2: bg/fg syntax checks
