@@ -330,7 +330,22 @@ int runCommand(struct job newJob, struct jobSet * jobList,
         return 0;
     } else if (!strcmp(newJob.progs[0].argv[0], "fg") ||
                !strcmp(newJob.progs[0].argv[0], "bg")) {
- 
+		
+		//Syntax checks
+		jobNum = atoi(&(newJob.progs[0].argv[1][1]));
+		for(job = jobList->head; job != NULL && job->jobId != jobNum; job = job->next);
+		
+		if( job->stoppedProgs ) {
+			for(i=0; < job->numProgs; i++) job->progs[i].isStopped = 0; /*Locate last suspended job*/	
+			job->stoppedProgs = 0;
+			job->progs[i].isStopped = 0;
+			if (kill(job->pgrp, SIGCONT) == -1) {
+				printf("Error: Cannot unsuspend program. Please try again\n");
+				return 1;
+			}
+			printf("Job %d unsuspended\n", jobNum);
+		}
+		
          // FILL IN HERE
 	// First of all do some syntax checking. 
 	// If the syntax check fails return 1
