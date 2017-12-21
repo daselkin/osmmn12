@@ -623,5 +623,6 @@ int main(int argc, char ** argv) {
         }
     }
 
+	printf("Abnormal termination");
     return 0;
 }
