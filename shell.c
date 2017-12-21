@@ -310,7 +310,7 @@ int runCommand(struct job newJob, struct jobSet * jobList, int inBg) {
             buf = realloc(buf, len);
         }
         printf("%s\n", buf);
-		prinf("Line 313\n");
+		printf("Line 313\n");
         free(buf);
         return 0;
     } else if (!strcmp(newJob.progs[0].argv[0], "cd")) {
