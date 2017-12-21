@@ -336,7 +336,7 @@ int runCommand(struct job newJob, struct jobSet * jobList,
 		for(job = jobList->head; job != NULL && job->jobId != jobNum; job = job->next);
 		
 		if( job->stoppedProgs ) {
-			for(i=0; < job->numProgs; i++) job->progs[i].isStopped = 0; /*Locate last suspended job*/	
+			for(i=0; i < job->numProgs; i++) job->progs[i].isStopped = 0; /*Locate last suspended job*/	
 			job->stoppedProgs = 0;
 			job->progs[i].isStopped = 0;
 			if (kill(job->pgrp, SIGCONT) == -1) {
