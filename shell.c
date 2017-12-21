@@ -364,7 +364,8 @@ int runCommand(struct job newJob, struct jobSet * jobList, int inBg) {
 		
 		//STUDENT PART 3: Move to foreground
 		/*Only for fg command*/
-		if( newJob.progs[0].argv[0][0] == 'f' ) 
+		if( newJob.progs[0].argv[0][0] == 'f' ) {
+			jobList->head = job;
 			if (tcsetpgrp(0, job->pgrp))
                     perror("tcsetpgrp");
 		
@@ -623,6 +624,6 @@ int main(int argc, char ** argv) {
         }
     }
 
-	printf("Abnormal termination");
+	printf("Abnormal termination\n");
     return 0;
 }
