@@ -55,8 +55,11 @@ void freeJob(struct job * cmd) {
 //        if (cmd->progs[i].redirections) free(cmd->progs[i].redirections);
         if (cmd->progs[i].freeGlob) globfree(&cmd->progs[i].globResult);
     }
+	printf("Line 58\n");
     free(cmd->progs);
+	printf("Line 60\n");
     if (cmd->text) free(cmd->text);
+	printf("Line 62\n");
     free(cmd->cmdBuf);
 }
 
@@ -307,6 +310,7 @@ int runCommand(struct job newJob, struct jobSet * jobList, int inBg) {
             buf = realloc(buf, len);
         }
         printf("%s\n", buf);
+		prinf("Line 313\n");
         free(buf);
         return 0;
     } else if (!strcmp(newJob.progs[0].argv[0], "cd")) {
@@ -331,7 +335,8 @@ int runCommand(struct job newJob, struct jobSet * jobList, int inBg) {
 			}
 			printf(JOB_STATUS_FORMAT, job->jobId, statusString, job->text);
 		}
-		//free(statusString);
+		printf("line 338\n");
+		free(statusString);
         return 0;
     } else if (!strcmp(newJob.progs[0].argv[0], "fg") || !strcmp(newJob.progs[0].argv[0], "bg")) {
 		//STUDENT PART 2: bg/fg syntax checks
@@ -371,10 +376,10 @@ int runCommand(struct job newJob, struct jobSet * jobList, int inBg) {
 			job->stoppedProgs = 0;
 			job->progs[i].isStopped = 0;
 			if (kill(job->pgrp, SIGCONT) == -1) {
-				printf("Error: Cannot unsuspend program. Please try again");
+				printf("Error: Cannot unsuspend program. Please try again\n");
 				return 1;
 			}
-			printf("Job %d unsuspended", jobNum);
+			printf("Job %d unsuspended\n", jobNum);
 		}
 		
 	/*If this point has been reached succesfully, exit*/
@@ -484,7 +489,7 @@ void removeJob(struct jobSet * jobList, struct job * job) {
         while (prevJob->next != job) prevJob = prevJob->next;
         prevJob->next = job->next;
     }
-
+	printf("line 492\n");
     free(job);
 }
 
