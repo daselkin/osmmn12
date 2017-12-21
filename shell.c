@@ -365,7 +365,7 @@ int runCommand(struct job newJob, struct jobSet * jobList, int inBg) {
 		//STUDENT PART 3: Move to foreground
 		/*Only for fg command*/
 		if( newJob.progs[0].argv[0][0] == 'f' ) {
-			jobList->head = job;
+			jobList->fg = job;
 			if (tcsetpgrp(0, job->pgrp))
                     perror("tcsetpgrp");
 		}
