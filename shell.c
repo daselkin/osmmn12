@@ -356,7 +356,16 @@ int runCommand(struct job newJob, struct jobSet * jobList, int inBg) {
 			return 1;
 		}
 		
-		//STUDENT PART 3: Unsuspend / Run in Background
+		//STUDENT PART 3: Move to foreground
+		/*Only for fg command*/
+		if( newJob.progs[0].argv[0][0] == 'f' ) 
+			if (tcsetpgrp(0, job->pgrp))
+                    perror("tcsetpgrp");
+		
+		/*If this point has been reached succesfully, exit*/
+        return 0;
+		
+		//STUDENT PART 4: Unsuspend / Run in Background
 		/*Note: A stopped program is unsuspended whether or not the bg or fg command was given*/
 		if( job->stoppedProgs ) {
 			for(i=0;
@@ -371,14 +380,6 @@ int runCommand(struct job newJob, struct jobSet * jobList, int inBg) {
 			printf("Job %d unsuspended", jobNum);
 		}
 
-		//STUDENT PART 4: Move to foreground
-		/*Only for fg command*/
-		if( newJob.progs[0].argv[0][0] == 'f' ) 
-			if (tcsetpgrp(0, job->pgrp))
-                    perror("tcsetpgrp");
-		
-		/*If this point has been reached succesfully, exit*/
-        return 0;
     }
 
     nextin = 0, nextout = 1;
