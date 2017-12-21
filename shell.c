@@ -301,6 +301,7 @@ int runCommand(struct job newJob, struct jobSet * jobList, int inBg) {
        these very easily */
     if (!strcmp(newJob.progs[0].argv[0], "exit")) {
         /* this should return a real exit code */
+		printf("Exited normally\n");
         exit(0);
     } else if (!strcmp(newJob.progs[0].argv[0], "pwd")) {
         len = 50;
