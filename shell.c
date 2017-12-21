@@ -362,9 +362,6 @@ int runCommand(struct job newJob, struct jobSet * jobList, int inBg) {
 			if (tcsetpgrp(0, job->pgrp))
                     perror("tcsetpgrp");
 		
-		/*If this point has been reached succesfully, exit*/
-        return 0;
-		
 		//STUDENT PART 4: Unsuspend / Run in Background
 		/*Note: A stopped program is unsuspended whether or not the bg or fg command was given*/
 		if( job->stoppedProgs ) {
@@ -375,10 +372,13 @@ int runCommand(struct job newJob, struct jobSet * jobList, int inBg) {
 			job->progs[i].isStopped = 0;
 			if (kill(job->pgrp, SIGCONT) == -1) {
 				printf("Error: Cannot unsuspend program. Please try again");
-				return -1;
+				return 1;
 			}
 			printf("Job %d unsuspended", jobNum);
 		}
+		
+	/*If this point has been reached succesfully, exit*/
+        return 0;
 
     }
 
