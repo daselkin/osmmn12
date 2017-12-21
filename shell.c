@@ -16,7 +16,6 @@
                                    string */
 #define JOB_STATUS_FORMAT "[%d] %-22s %.40s\n"
 
-#define STATUS_STRING_SIZE 10 /*max length of status string for jobs command */
 
 
 struct jobSet {
@@ -55,11 +54,8 @@ void freeJob(struct job * cmd) {
 //        if (cmd->progs[i].redirections) free(cmd->progs[i].redirections);
         if (cmd->progs[i].freeGlob) globfree(&cmd->progs[i].globResult);
     }
-	printf("Line 58\n");
     free(cmd->progs);
-	printf("Line 60\n");
     if (cmd->text) free(cmd->text);
-	printf("Line 62\n");
     free(cmd->cmdBuf);
 }
 
@@ -133,10 +129,11 @@ void globLastArgument(struct childProgram * prog, int * argcPtr,
 int parseCommand(char ** commandPtr, struct job * job, int * isBg) {
     char * command;
     char * returnCommand = NULL;
-    char * src, * buf;
+    char * src, * buf, * chptr;
     int argc = 0;
     int done = 0;
     int argvAlloced;
+    int i;
     char quote = '\0';  
     int count;
     struct childProgram * prog;
@@ -288,7 +285,8 @@ int parseCommand(char ** commandPtr, struct job * job, int * isBg) {
 }
 
 
-int runCommand(struct job newJob, struct jobSet * jobList, int inBg) {
+int runCommand(struct job newJob, struct jobSet * jobList, 
+               int inBg) {
     struct job * job;
     char * newdir, * buf;
     int i, len;
@@ -301,7 +299,6 @@ int runCommand(struct job newJob, struct jobSet * jobList, int inBg) {
        these very easily */
     if (!strcmp(newJob.progs[0].argv[0], "exit")) {
         /* this should return a real exit code */
-		printf("Exited normally\n");
         exit(0);
     } else if (!strcmp(newJob.progs[0].argv[0], "pwd")) {
         len = 50;
@@ -311,11 +308,10 @@ int runCommand(struct job newJob, struct jobSet * jobList, int inBg) {
             buf = realloc(buf, len);
         }
         printf("%s\n", buf);
-		printf("Line 313\n");
         free(buf);
         return 0;
     } else if (!strcmp(newJob.progs[0].argv[0], "cd")) {
-        if ((!newJob.progs[0].argv[1]) == 1) 
+        if (!newJob.progs[0].argv[1] == 1) 
             newdir = getenv("HOME");
         else 
             newdir = newJob.progs[0].argv[1];
@@ -324,70 +320,30 @@ int runCommand(struct job newJob, struct jobSet * jobList, int inBg) {
                     strerror(errno));
         return 0;
     } else if (!strcmp(newJob.progs[0].argv[0], "jobs")) {
-		//STUDENT PART 1: Impelementing jobs command
-		statusString = malloc(STATUS_STRING_SIZE);
-		for(job = jobList->head; job != NULL; job = job->next) {
-			for( i = 0; i < job->runningProgs; i++) {
-				if( job->progs[i].isStopped ) {
-					sprintf(statusString, "Stopped");
-				} else {
-					sprintf(statusString, "Running");
-				}
-			}
-			printf(JOB_STATUS_FORMAT, job->jobId, statusString, job->text);
-		}
-		printf("line 338\n");
-		free(statusString);
+        // FILL IN HERE
+        // Scan the job list and print jobs' status
+	// using the following function 
+        //    printf(JOB_STATUS_FORMAT, job->jobId, statusString,
+        //            job->text);
+ 	// while statusString is one of the {Stopped, Running}
+
         return 0;
-    } else if (!strcmp(newJob.progs[0].argv[0], "fg") || !strcmp(newJob.progs[0].argv[0], "bg")) {
-		//STUDENT PART 2: bg/fg syntax checks
-		if( newJob.progs[0].argv[1][0] != '%') {
-			printf("Invalid synax. Argument should be %%, followed by process number\n");
-			return 1;
-		}
-		jobNum = atoi(&(newJob.progs[0].argv[1][1]));
-		if( jobNum == 0 &&  newJob.progs[0].argv[1][1] != '0') {
-			printf("Invalid synax. Argument should be %%, followed by process number\n");
-			return 1;
-		}
-		for(job = jobList->head; job != NULL && job->jobId != jobNum; job = job->next);
-		if( job == NULL ) {
-			printf("Invalid job IDs. Please type \"jobs\" for a list of job IDs");
-			return 1;
-		}
-		
-		/*bg command but no suspended process*/
-		if( newJob.progs[0].argv[0][0] == 'b' && !job->stoppedProgs) {
-			printf("No suspended processes in job %d", jobNum);
-			return 1;
-		}
-		
-		//STUDENT PART 3: Move to foreground
-		/*Only for fg command*/
-		if( newJob.progs[0].argv[0][0] == 'f' ) {
-			jobList->fg = job;
-			if (tcsetpgrp(0, job->pgrp))
-                    perror("tcsetpgrp");
-		}
-		
-		//STUDENT PART 4: Unsuspend / Run in Background
-		/*Note: A stopped program is unsuspended whether or not the bg or fg command was given*/
-		if( job->stoppedProgs ) {
-			for(i=0;
-				i < job->numProgs;
-				i++) job->progs[i].isStopped = 0; /*Locate last suspended job*/	
-			job->stoppedProgs = 0;
-			job->progs[i].isStopped = 0;
-			if (kill(job->pgrp, SIGCONT) == -1) {
-				printf("Error: Cannot unsuspend program. Please try again\n");
-				return 1;
-			}
-			printf("Job %d unsuspended\n", jobNum);
-		}
-		
-	/*If this point has been reached succesfully, exit*/
-	printf("Debuggy\n");
-	return 0;
+    } else if (!strcmp(newJob.progs[0].argv[0], "fg") ||
+               !strcmp(newJob.progs[0].argv[0], "bg")) {
+ 
+         // FILL IN HERE
+	// First of all do some syntax checking. 
+	// If the syntax check fails return 1
+	// else find the job in the job list 
+  	// If job not found return 1
+	// If strcmp(newJob.progs[0].argv[0] == "f"
+	// then put the job you found in the foreground (use tcsetpgrp)
+	// Don't forget to update the fg field in jobList
+	// In any case restart the processes in the job by calling 
+	// kill(-job->pgrp, SIGCONT). Don't forget to set isStopped = 0   
+	// in every proicess and stoppedProgs = 0 in the job
+
+        return 0;
     }
 
     nextin = 0, nextout = 1;
@@ -492,7 +448,7 @@ void removeJob(struct jobSet * jobList, struct job * job) {
         while (prevJob->next != job) prevJob = prevJob->next;
         prevJob->next = job->next;
     }
-	printf("line 492\n");
+
     free(job);
 }
 
@@ -625,6 +581,5 @@ int main(int argc, char ** argv) {
         }
     }
 
-	printf("Abnormal termination\n");
     return 0;
 }
