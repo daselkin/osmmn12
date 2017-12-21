@@ -368,6 +368,7 @@ int runCommand(struct job newJob, struct jobSet * jobList, int inBg) {
 			jobList->head = job;
 			if (tcsetpgrp(0, job->pgrp))
                     perror("tcsetpgrp");
+		}
 		
 		//STUDENT PART 4: Unsuspend / Run in Background
 		/*Note: A stopped program is unsuspended whether or not the bg or fg command was given*/
