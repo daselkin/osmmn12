@@ -386,8 +386,8 @@ int runCommand(struct job newJob, struct jobSet * jobList, int inBg) {
 		}
 		
 	/*If this point has been reached succesfully, exit*/
-        return 0;
-
+	printf("Debuggy\n");
+	return 0;
     }
 
     nextin = 0, nextout = 1;
