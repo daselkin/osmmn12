@@ -310,7 +310,6 @@ int runCommand(struct job newJob, struct jobSet * jobList, int inBg) {
             buf = realloc(buf, len);
         }
         printf("%s\n", buf);
-		printf("Line 313\n");
         free(buf);
         return 0;
     } else if (!strcmp(newJob.progs[0].argv[0], "cd")) {
@@ -335,7 +334,6 @@ int runCommand(struct job newJob, struct jobSet * jobList, int inBg) {
 			}
 			printf(JOB_STATUS_FORMAT, job->jobId, statusString, job->text);
 		}
-		printf("line 338\n");
 		free(statusString);
         return 0;
     } else if (!strcmp(newJob.progs[0].argv[0], "fg") || !strcmp(newJob.progs[0].argv[0], "bg")) {
@@ -377,7 +375,6 @@ int runCommand(struct job newJob, struct jobSet * jobList, int inBg) {
 				i++) job->progs[i].isStopped = 0; /*Locate last suspended job*/	
 			job->stoppedProgs = 0;
 			job->progs[i].isStopped = 0;
-			printf("killz");
 			if (kill(job->pgrp, SIGCONT) == -1) {
 				printf("Error: Cannot unsuspend program. Please try again\n");
 				return 1;
@@ -500,13 +497,20 @@ void removeJob(struct jobSet * jobList, struct job * job) {
    have, figure out why and see if a job has completed */
 /*BONUS PART 2: Change signature so checkJobs can be used as a singal handler*/
 void checkJobs(int sig_num) {
+	sigset_t mask;
+	
     struct job * job;
     pid_t childpid;
     int status;
     int progNum;
    
-    while ((childpid = waitpid(-1, &status, WNOHANG | WUNTRACED)) > 0) {
-        for (job = jobList->head; job; job = job->next) {
+   /*Suspend child state-change signals before entering critical region*/
+   if( sigemptyset(&mask) < 0) perror("sigemptyset");
+   if( sigaddset(&mask, SIGCHLD) < 0) perror("sigaddset");
+   if( sigprocmask(SIG_BLOCK, &mask, NULL) < 0) perror ("sigprocmask - block");
+   
+    if ((childpid = waitpid(-1, &status, WNOHANG | WUNTRACED)) > 0) {
+        for (job = jobList.head; job; job = job->next) {
             progNum = 0;
             while (progNum < job->numProgs && 
                         job->progs[progNum].pid != childpid)
@@ -520,23 +524,42 @@ void checkJobs(int sig_num) {
             job->progs[progNum].pid = 0;
 
             if (!job->runningProgs) {
-                printf(JOB_STATUS_FORMAT, job->jobId, "Done", job->text);
-                removeJob(jobList, job);
+				if (job == jobList.fg) { /*Child is the foreground process*/
+					jobList.fg = NULL;
+				} else { /*Child is a background process*/
+					printf(JOB_STATUS_FORMAT, job->jobId, "Done", job->text);
+				}
+				removeJob(&jobList, job);
             }
         } else {
             /* child stopped */
+			if( job == jobList.fg
             job->stoppedProgs++;
             job->progs[progNum].isStopped = 1;
 
-            if (job->stoppedProgs == job->numProgs) {
-                printf(JOB_STATUS_FORMAT, job->jobId, "Stopped", job->text);
-            }
+			if( job == jobList.fg ) {
+				jobList.fg = NULL;
+			} else {
+				if (job->stoppedProgs == job->numProgs) {
+					printf(JOB_STATUS_FORMAT, job->jobId, "Stopped", job->text);
+				}
+			}
         }
+		if (!jobList.fg) {
+			/* If foreground process suspended/terminated, move the shell to the foreground */
+            if (tcsetpgrp(0, getpid()))
+				perror("tcsetpgrp");
+            }
     }
 
     if (childpid == -1 && errno != ECHILD)
         perror("waitpid");
+
+	/*Leaving critical region; remove signal deferal*/
+	if( sigprocmask(SIG_UNBLOCK, &mask, NULL) < 0) perror ("sigprocmask - unblock");
 }
+
+
 
 int main(int argc, char ** argv) {
     char command[MAX_COMMAND_LEN + 1];
@@ -565,15 +588,15 @@ int main(int argc, char ** argv) {
     signal (SIGTSTP, SIG_IGN);
     signal (SIGTTIN, SIG_IGN);
     signal (SIGTTOU, SIG_IGN);
-	/*BONUS PART 2: 	Set up a signal handler for SIGCHLD*/
+	/*BONUS PART 3a: 	Set up a signal handler for SIGCHLD*/
 	signal (SIGCHLD, checkJobs);
  
     while (1) {
         if (!jobList.fg) {
             /* no job is in the foreground */
 
-            /* BONUS PART 3: Remove call to checkJobs */
-            checkJobs(&jobList);
+            /* BONUS PART 3b: Remove call to checkJobs */
+            /*checkJobs(&jobList); */
 
             if (!nextCommand) {
                 if (getCommand(input, command)) break;
@@ -584,48 +607,7 @@ int main(int argc, char ** argv) {
                               newJob.numProgs) {
                 runCommand(newJob, &jobList, inBg);
             }
-		printf("YAS QHEEN");
-        } else {
-            /* a job is running in the foreground; wait for it */
-            i = 0;
-            while (!jobList.fg->progs[i].pid ||
-                   jobList.fg->progs[i].isStopped) i++;
-
-            waitpid(jobList.fg->progs[i].pid, &status, WUNTRACED);
-
-            if (WIFEXITED(status) || WIFSIGNALED(status)) {
-                /* the child exited */
-                jobList.fg->runningProgs--;
-                jobList.fg->progs[i].pid = 0;
-            
-                if (!jobList.fg->runningProgs) {
-                    /* child exited */
-
-                    removeJob(&jobList, jobList.fg);
-                    jobList.fg = NULL;
-
-                    /* move the shell to the foreground */
-                    if (tcsetpgrp(0, getpid()))
-                        perror("tcsetpgrp");
-                }
-            } else {
-                /* the child was stopped */
-                jobList.fg->stoppedProgs++;
-                jobList.fg->progs[i].isStopped = 1;
-
-                if (jobList.fg->stoppedProgs == jobList.fg->runningProgs) {
-                    printf("\n" JOB_STATUS_FORMAT, jobList.fg->jobId, 
-                                "Stopped", jobList.fg->text);
-                    jobList.fg = NULL;
-                }
-            }
-
-            if (!jobList.fg) {
-                /* move the shell to the foreground */
-                if (tcsetpgrp(0, getpid()))
-                    perror("tcsetpgrp");
-            }
-        }
+		}
     }
 	
 	printf("Abnormal termination\n");
