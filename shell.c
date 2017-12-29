@@ -58,7 +58,7 @@ void freeJob(struct job * cmd) {
 	printf("Line 58\n");
     free(cmd->progs);
 	printf("Line 60\n");
-    if (cmd->text) free(cmd->text);
+    if (cmd->text) {print cmd.text; free(cmd->text)}
 	printf("Line 62\n");
     free(cmd->cmdBuf);
 }
