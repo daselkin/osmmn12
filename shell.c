@@ -55,11 +55,8 @@ void freeJob(struct job * cmd) {
 //        if (cmd->progs[i].redirections) free(cmd->progs[i].redirections);
         if (cmd->progs[i].freeGlob) globfree(&cmd->progs[i].globResult);
     }
-	printf("Line 58\n");
-    free(cmd->progs);
-	printf("Line 60\n");
-    if (cmd->text) {printf("cmd.text"); free(cmd->text);}
-	printf("Line 62\n");
+    free(cmd->progs);	
+    if (cmd->text) {printf("%s",cmd.text); free(cmd->text);}
     free(cmd->cmdBuf);
 }
 
@@ -482,16 +479,9 @@ int runCommand(struct job newJob, struct jobSet * jobList, int inBg) {
     return 0;
 }
 
-void mem_error_handler(int sig_num) {
-	printf("Memory error found\n");
-}
-
 
 void removeJob(struct jobSet * jobList, struct job * job) {
     struct job * prevJob;
-
-	/*A small extra: avoid core dumps when two processes terminate simultenously*/ 
-	signal (SIGSEGV, mem_error_handler);
 	
     freeJob(job); 
     if (job == jobList->head) {
@@ -501,10 +491,8 @@ void removeJob(struct jobSet * jobList, struct job * job) {
         while (prevJob->next != job) prevJob = prevJob->next;
         prevJob->next = job->next;
     }
-	printf("line 492\n");
     free(job);
 	
-	signal (SIGSEGV, SIG_DFL);
 }
 
 /* Checks to see if any background processes have exited -- if they 
