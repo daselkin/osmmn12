@@ -502,6 +502,10 @@ void removeJob(struct jobSet * jobList, struct job * job) {
 	signal (SIGSEGV, SIG_DFL);
 }
 
+void mem_error_handler(int sig_num) {
+	printf("Memory error found\n");
+}
+
 /* Checks to see if any background processes have exited -- if they 
    have, figure out why and see if a job has completed */
 void checkJobs(struct jobSet * jobList) {
