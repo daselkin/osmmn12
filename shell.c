@@ -58,7 +58,7 @@ void freeJob(struct job * cmd) {
         if (cmd->progs[i].freeGlob) globfree(&cmd->progs[i].globResult);
     }
     free(cmd->progs);	
-    if (cmd->text) {printf("%s",cmd->text); free(cmd->text);}
+    //if (cmd->text) free(cmd->text);
     free(cmd->cmdBuf);
 }
 
