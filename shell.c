@@ -482,6 +482,11 @@ int runCommand(struct job newJob, struct jobSet * jobList, int inBg) {
     return 0;
 }
 
+void mem_error_handler(int sig_num) {
+	printf("Memory error found\n");
+}
+
+
 void removeJob(struct jobSet * jobList, struct job * job) {
     struct job * prevJob;
 
@@ -500,10 +505,6 @@ void removeJob(struct jobSet * jobList, struct job * job) {
     free(job);
 	
 	signal (SIGSEGV, SIG_DFL);
-}
-
-void mem_error_handler(int sig_num) {
-	printf("Memory error found\n");
 }
 
 /* Checks to see if any background processes have exited -- if they 
