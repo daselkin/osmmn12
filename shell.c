@@ -485,6 +485,9 @@ int runCommand(struct job newJob, struct jobSet * jobList, int inBg) {
 void removeJob(struct jobSet * jobList, struct job * job) {
     struct job * prevJob;
 
+	/*A small extra: avoid core dumps when two processes terminate simultenously*/ 
+	signal (SIGSEGV, SIG_IGN);
+	
     freeJob(job); 
     if (job == jobList->head) {
         jobList->head = job->next;
@@ -494,9 +497,8 @@ void removeJob(struct jobSet * jobList, struct job * job) {
         prevJob->next = job->next;
     }
 	printf("line 492\n");
-	/*A small extra: avoid core dumps when two processes terminate simultenously*/ 
-	signal (SIGSEGV, SIG_IGN);
     free(job);
+	
 	signal (SIGSEGV, SIG_DFL);
 }
 
