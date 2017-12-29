@@ -1,4 +1,4 @@
-// TODO: - fill the missing parts
+// TODO: - fill the missing 
 //       - write Makefile with 'shell' executable as a target
 #include <ctype.h>
 #include <errno.h>
@@ -536,12 +536,11 @@ void checkJobs(int sig_num) {
             job->stoppedProgs++;
             job->progs[progNum].isStopped = 1;
 
-			if( job == jobList.fg ) {
-				jobList.fg = NULL;
-			} else {
-				if (job->stoppedProgs == job->numProgs) {
+			if (job->stoppedProgs == job->numProgs) {
 					printf(JOB_STATUS_FORMAT, job->jobId, "Stopped", job->text);
 				}
+			if( job == jobList.fg ) {
+				jobList.fg = NULL;
 			}
         }
 		if (!jobList.fg) {
@@ -595,8 +594,6 @@ int main(int argc, char ** argv) {
             /* no job is in the foreground */
 
             /* BONUS PART 3b: Remove call to checkJobs */
-            /*checkJobs(&jobList); */
-
             if (!nextCommand) {
                 if (getCommand(input, command)) break;
                 nextCommand = command;
