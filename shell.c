@@ -24,6 +24,8 @@ struct jobSet {
     struct job * fg;        /* current foreground job */
 };
 
+/*BONUS PART 1: Make jobList global, so it can be used by the signal handler*/
+struct jobSet jobList = { NULL, NULL };
 
 struct childProgram {
     pid_t pid;              /* 0 if exited */
@@ -384,7 +386,6 @@ int runCommand(struct job newJob, struct jobSet * jobList, int inBg) {
 		}
 		
 	/*If this point has been reached succesfully, exit*/
-	printf("Debuggy\n");
 	return 0;
     }
 
@@ -425,8 +426,8 @@ int runCommand(struct job newJob, struct jobSet * jobList, int inBg) {
                     newJob.progs[i].argv[0], 
                     strerror(errno));
             exit(1);
-        }
-
+         } 
+		
         /* put our child in the process group whose leader is the
            first process in this pipe */
         setpgid(newJob.progs[i].pid, newJob.progs[0].pid);
@@ -497,7 +498,8 @@ void removeJob(struct jobSet * jobList, struct job * job) {
 
 /* Checks to see if any background processes have exited -- if they 
    have, figure out why and see if a job has completed */
-void checkJobs(struct jobSet * jobList) {
+/*BONUS PART 2: Change signature so checkJobs can be used as a singal handler*/
+void checkJobs(int sig_num) {
     struct job * job;
     pid_t childpid;
     int status;
@@ -539,7 +541,6 @@ void checkJobs(struct jobSet * jobList) {
 int main(int argc, char ** argv) {
     char command[MAX_COMMAND_LEN + 1];
     char * nextCommand = NULL;
-    struct jobSet jobList = { NULL, NULL };
     struct job newJob;
     FILE * input = stdin;
     int i;
@@ -563,13 +564,15 @@ int main(int argc, char ** argv) {
     signal (SIGQUIT, SIG_IGN);
     signal (SIGTSTP, SIG_IGN);
     signal (SIGTTIN, SIG_IGN);
-    signal (SIGTTOU, SIG_IGN);  
+    signal (SIGTTOU, SIG_IGN);
+	/*BONUS PART 2: 	Set up a signal handler for SIGCHLD*/
+	signal (SIGCHLD, checkJobs);
  
     while (1) {
         if (!jobList.fg) {
             /* no job is in the foreground */
 
-            /* see if any background processes have exited */
+            /* BONUS PART 3: Remove call to checkJobs */
             checkJobs(&jobList);
 
             if (!nextCommand) {
@@ -581,6 +584,7 @@ int main(int argc, char ** argv) {
                               newJob.numProgs) {
                 runCommand(newJob, &jobList, inBg);
             }
+		printf("YAS QHEEN");
         } else {
             /* a job is running in the foreground; wait for it */
             i = 0;
