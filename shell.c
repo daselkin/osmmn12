@@ -486,7 +486,7 @@ void removeJob(struct jobSet * jobList, struct job * job) {
     struct job * prevJob;
 
 	/*A small extra: avoid core dumps when two processes terminate simultenously*/ 
-	signal (SIGSEGV, SIG_IGN);
+	signal (SIGSEGV, mem_error_handler);
 	
     freeJob(job); 
     if (job == jobList->head) {
