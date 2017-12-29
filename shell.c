@@ -533,7 +533,6 @@ void checkJobs(int sig_num) {
             }
         } else {
             /* child stopped */
-			if( job == jobList.fg
             job->stoppedProgs++;
             job->progs[progNum].isStopped = 1;
 
